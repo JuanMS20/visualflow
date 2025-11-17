@@ -18,12 +18,26 @@ This directory contains the Node.js backend for the VisualFlow application. The 
     QWEN_VL_API_KEY='your_qwen_vl_api_key'
     ```
 
-## Running the Server
+## Running the Application
 
-To start the backend server, run the following command in this directory:
+To run the full application, you need to start both the backend and the frontend servers.
+
+### 1. Start the Backend
+
+In your terminal, navigate to the `backend` directory and run:
 
 ```
 node server.js
 ```
 
-The server will start on port 3000 by default.
+The backend server will start on port 3000.
+
+### 2. Start the Frontend
+
+Open a **new** terminal window, navigate to the `frontend` directory, and run:
+
+```
+python -m http.server
+```
+
+The frontend will be available at `http://localhost:8000`. You can now open this URL in your browser to use the application.
