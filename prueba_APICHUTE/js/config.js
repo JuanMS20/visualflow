@@ -1,0 +1,137 @@
+/**
+ * Configuración de VisualFlow - Frontend Directo
+ * 
+ * IMPORTANTE: Este archivo contiene claves API sensibles.
+ * - En desarrollo: Usar .env.local con Vite
+ * - En producción: Rotar claves frecuentemente
+ * - NUNCA subir claves reales a repositorios públicos
+ */
+
+// Configuración de APIs de Chutes AI
+export const CONFIG = {
+  // Claves API - Reemplazar con valores reales
+  KIMI_API_KEY: 'cpk_7d264dc3847b467ea59f4da1d1d050a3.980bfcccb81f51a3ab901cf5c53fc6e0.S6Mp1WEGMU6rThOvkgw4Lih43ndh5M2O',
+  QWEN_IMAGE_API_KEY: 'cpk_7d264dc3847b467ea59f4da1d1d050a3.980bfcccb81f51a3ab901cf5c53fc6e0.S6Mp1WEGMU6rThOvkgw4Lih43ndh5M2O',
+  QWEN_VL_API_KEY: 'cpk_7d264dc3847b467ea59f4da1d1d050a3.980bfcccb81f51a3ab901cf5c53fc6e0.S6Mp1WEGMU6rThOvkgw4Lih43ndh5M2O',
+  
+  // Endpoints
+  ENDPOINT_LLM: 'https://llm.chutes.ai/v1/chat/completions',
+  ENDPOINT_IMAGE: 'https://image.chutes.ai/generate',
+  
+  // Modelos
+  MODELS: {
+    KIMI: 'moonshotai/Kimi-K2-Thinking',
+    QWEN_IMAGE: 'qwen-image',
+    QWEN_VL: 'Qwen/Qwen3-VL-235B-A22B-Instruct'
+  },
+  
+  // Límites y configuración
+  RATE_LIMIT: {
+    MIN_INTERVAL: 5000, // 5 segundos entre llamadas
+    DAILY_LIMIT: 50     // 50 diagramas por día
+  },
+  
+  // Configuración de generación de imágenes
+  IMAGE_CONFIG: {
+    width: 1024,
+    height: 1024,
+    steps: 50,
+    guidanceScale: 7.5,
+    negativePrompt: 'texto, letras, números, palabras, blur, low quality, distortion, watermark'
+  },
+  
+  // Configuración de TOON
+  TOON_CONFIG: {
+    delimiter: ',',
+    indent: 2,
+    lengthMarker: '#'
+  }
+};
+
+// 🚨 SISTEMA DE LOGGING CON LOCALSTORAGE + PANEL DEBUG
+export const DEBUG = {
+  enabled: true,
+  maxLogs: 1000,
+  
+  log: function(message) {
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = `[${timestamp}] ${message}`;
+    
+    // Guardar en localStorage
+    try {
+      let logs = JSON.parse(localStorage.getItem('visualflow_logs') || '[]');
+      logs.unshift(logEntry);
+      if (logs.length > this.maxLogs) logs.pop();
+      localStorage.setItem('visualflow_logs', JSON.stringify(logs));
+    } catch (e) {
+      console.warn('No se pudo guardar log en localStorage:', e);
+    }
+    
+    // Mostrar en consola
+    console.log(`📝 ${logEntry}`);
+    
+    // Actualizar panel si existe
+    this.updatePanel();
+  },
+  
+  error: function(message) {
+    this.log(`❌ ERROR: ${message}`);
+  },
+  
+  getLogs: function() {
+    try {
+      return JSON.parse(localStorage.getItem('visualflow_logs') || '[]');
+    } catch (e) {
+      return [];
+    }
+  },
+  
+  clearLogs: function() {
+    localStorage.removeItem('visualflow_logs');
+    this.updatePanel();
+  },
+  
+  updatePanel: function() {
+    const panel = document.getElementById('debug-panel');
+    if (panel) {
+      const logs = this.getLogs();
+      const content = panel.querySelector('.debug-content');
+      if (content) {
+        content.innerHTML = logs.join('<br>');
+        content.scrollTop = 0;
+      }
+    }
+  },
+  
+  exportLogs: function() {
+    const logs = this.getLogs().join('\n');
+    const blob = new Blob([logs], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `visualflow-debug-${Date.now()}.log`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+};
+
+// ADVERTENCIA DE SEGURIDAD
+console.warn(
+  '%c⚠️ ADVERTENCIA DE SEGURIDAD ⚠️',
+  'color: #f59e0b; font-size: 16px; font-weight: bold;'
+);
+console.warn(
+  'Este archivo contiene claves API sensibles en el frontend.\n' +
+  '• Solo usar para pruebas y desarrollo\n' +
+  '• Rotar claves frecuentemente\n' +
+  '• NUNCA subir claves reales a repositorios públicos\n' +
+  '• Para producción, implementar backend proxy'
+);
+
+// 🚨 INICIAR LOGGING
+DEBUG.log('=== VISUALFLOW INICIADO ===');
+DEBUG.log('Fecha: ' + new Date().toISOString());
+DEBUG.log('Archivo de debug: ' + DEBUG.file);
+
+// Exportar para uso global
+window.VISUALFLOW_CONFIG = CONFIG;
