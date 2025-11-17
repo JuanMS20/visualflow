@@ -1,6 +1,6 @@
 /**
  * VisualFlowApp - Aplicación principal de VisualFlow
- * 
+ *
  * Coordina todos los componentes:
  * - PipelineService (generación de diagramas)
  * - DiagramRenderer (renderizado)
@@ -19,7 +19,7 @@ export class VisualFlowApp {
     this.json = JsonService;
     this.progressModal = null;
     this.planningChat = null;
-    
+
     // Estado de la aplicación
     this.state = {
       currentMode: 'visual',
@@ -29,10 +29,10 @@ export class VisualFlowApp {
       isLoading: false,
       generationHistory: this.loadHistory()
     };
-    
+
     // Elementos del DOM
     this.elements = {};
-    
+
     this.init();
   }
 
@@ -45,7 +45,7 @@ export class VisualFlowApp {
     this.initProgressModal();
     this.bindEvents();
     this.updateUI();
-    
+
     console.log('✅ VisualFlowApp inicializada');
     console.log('📊 Estado inicial:', this.state);
   }
@@ -61,31 +61,31 @@ export class VisualFlowApp {
       modeButtons: document.querySelectorAll('.mode-button'),
       themeButtons: document.querySelectorAll('.theme-button[data-theme]'),
       templateSelect: document.getElementById('templateSelect'),
-      
+
       // Canvas y renderizado
       canvas: document.getElementById('diagramCanvas'),
       loadingSpinner: document.getElementById('loadingSpinner'),
       canvasTitle: document.getElementById('canvasTitle'),
       canvasSubtitle: document.getElementById('canvasSubtitle'),
       canvasStats: document.getElementById('canvasStats'),
-      
+
       // Botones de acción
       exportBtn: document.getElementById('exportBtn'),
       variationsBtn: document.getElementById('variationsBtn'),
       optimizeBtn: document.getElementById('optimizeBtn'),
-      
+
       // Sidebar
       elementCount: document.getElementById('elementCount'),
       connectionCount: document.getElementById('connectionCount'),
       sidebarVariations: document.getElementById('sidebarVariations'),
       sidebarOptimize: document.getElementById('sidebarOptimize'),
       sidebarExport: document.getElementById('sidebarExport'),
-      
+
       // Mensajes
       errorContainer: document.getElementById('errorContainer'),
       errorText: document.getElementById('errorText')
     };
-    
+
     // Placeholders según modo
     this.placeholders = {
       semantic: "Describe conceptos con relaciones: Ej: Secuencia de la teoría del delito: ladrón - teoría - delito...",
@@ -103,13 +103,13 @@ export class VisualFlowApp {
       console.error('Canvas no encontrado');
       return;
     }
-    
+
     this.renderer = new DiagramRenderer(this.elements.canvas, {
       zoom: 1,
       offset: { x: 0, y: 0 },
       debug: false
     });
-    
+
     console.log('🎨 DiagramRenderer inicializado');
   }
 
@@ -124,8 +124,8 @@ export class VisualFlowApp {
       console.warn('⚠️ ProgressModal no disponible');
     }
   }
-  
-  
+
+
   /**
    * Bindea eventos de la UI
    */
@@ -134,7 +134,7 @@ export class VisualFlowApp {
     this.elements.generateBtn.addEventListener('click', () => {
       this.generateDiagram();
     });
-    
+
     // Enter en textarea
     this.elements.textInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && e.ctrlKey) {
@@ -142,7 +142,7 @@ export class VisualFlowApp {
         this.generateDiagram();
       }
     });
-    
+
     // Cambio de modo
     this.elements.modeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -150,7 +150,7 @@ export class VisualFlowApp {
         this.setMode(mode);
       });
     });
-    
+
     // Cambio de tema
     this.elements.themeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -158,30 +158,30 @@ export class VisualFlowApp {
         this.setTheme(theme);
       });
     });
-    
+
     // Cambio de template
     if (this.elements.templateSelect) {
       this.elements.templateSelect.addEventListener('change', (e) => {
         this.state.currentTemplate = e.target.value;
       });
     }
-    
+
     // Botones de acción
     this.elements.exportBtn.addEventListener('click', () => this.exportDiagram());
     this.elements.variationsBtn.addEventListener('click', () => this.generateVariations());
     this.elements.optimizeBtn.addEventListener('click', () => this.optimizeDiagram());
-    
+
     // Sidebar actions
     this.elements.sidebarVariations.addEventListener('click', () => this.generateVariations());
     this.elements.sidebarOptimize.addEventListener('click', () => this.optimizeDiagram());
     this.elements.sidebarExport.addEventListener('click', () => this.exportDiagram());
-    
+
     // Eventos del pipeline
     document.addEventListener('pipeline-state-change', (e) => {
       console.log('📡 Evento pipeline-state-change recibido:', e.detail);
       this.onPipelineStateChange(e.detail);
     });
-    
+
     console.log('🎯 Eventos bindeados');
   }
 
@@ -190,17 +190,17 @@ export class VisualFlowApp {
    */
   async generateDiagram() {
     const prompt = this.elements.textInput.value.trim();
-    
+
     if (!prompt) {
       this.showError('Por favor, ingresa un texto para generar el diagrama');
       return;
     }
-    
+
     if (this.state.isLoading) {
       this.showError('Ya hay una generación en curso');
       return;
     }
-    
+
     // Verificar límites
     try {
       this.pipeline.chutes.checkDailyLimit();
@@ -208,7 +208,7 @@ export class VisualFlowApp {
       this.showError(error.message);
       return;
     }
-    
+
     // 🔥 INICIAR DIAGNÓSTICO
     console.log('🔍 INICIANDO DIAGNÓSTICO DE PROGRESO...');
     if (window.diagnostic) {
@@ -217,7 +217,7 @@ export class VisualFlowApp {
     } else {
       console.warn('⚠️ Herramienta de diagnóstico no disponible');
     }
-    
+
     // 🔥 MOSTRAR MODAL INMEDIATAMENTE (antes de cualquier otra operación)
     console.log('🎯 Mostrando modal de progreso...');
     if (this.progressModal) {
@@ -234,58 +234,58 @@ export class VisualFlowApp {
       this.showError('Error: Modal de progreso no disponible');
       return;
     }
-    
+
     this.setLoading(true);
     this.hideError();
     this.clearCanvas();
-    
+
     try {
       console.log('🚀 Iniciando generación de diagrama...');
       console.log('📝 Prompt:', prompt);
-      
+
       // Llamar al pipeline
       const result = await this.pipeline.generateDiagram(prompt, {
         mode: this.state.currentMode,
         template: this.state.currentTemplate,
         theme: this.state.currentTheme
       });
-      
+
       if (result.success) {
         console.log('✅ Diagrama generado exitosamente:', result);
-        
+
         // Renderizar diagrama
         this.renderer.renderFromJson(result.diagram);
-        
+
         // Forzar renderizado si no se ve nada
         setTimeout(() => {
           if (this.renderer && this.renderer.diagram) {
             this.renderer.render();
           }
         }, 100);
-        
+
         // Actualizar UI
         this.state.hasDiagram = true;
         this.updateActionButtons();
         this.updateStats(result.stats, result.images);
         this.addToHistory(prompt, result);
-        
+
         // Mostrar éxito
         this.showSuccess('Diagrama generado exitosamente');
-        
+
       } else {
         console.error('❌ Error en generación:', result.error);
         this.showError(result.error || 'Error al generar el diagrama');
-        
+
         // Mostrar error en modal
         if (this.progressModal) {
           this.progressModal.showError(result.error);
         }
       }
-      
+
     } catch (error) {
       console.error('❌ Error inesperado:', error);
       this.showError(`Error: ${error.message}`);
-      
+
       // Mostrar error en modal
       if (this.progressModal) {
         this.progressModal.showError(error.message);
@@ -293,7 +293,7 @@ export class VisualFlowApp {
     } finally {
       this.setLoading(false);
       // El modal se oculta automáticamente cuando el pipeline termina
-      
+
       // Finalizar diagnóstico
       setTimeout(() => {
         if (window.diagnostic) {
@@ -311,9 +311,9 @@ export class VisualFlowApp {
       this.showError('No hay diagrama para generar variaciones');
       return;
     }
-    
+
     this.showNotification('🔄 Generando 3 variaciones...', 'info');
-    
+
     // Simular generación de variaciones
     setTimeout(() => {
       this.showNotification('✅ Variaciones generadas. Revisa el canvas.', 'success');
@@ -328,9 +328,9 @@ export class VisualFlowApp {
       this.showError('No hay diagrama para optimizar');
       return;
     }
-    
+
     this.showNotification('✨ Optimizando diagrama con IA...', 'info');
-    
+
     // Simular optimización
     setTimeout(() => {
       this.showNotification('✅ Diagrama optimizado. Espaciado mejorado.', 'success');
@@ -345,7 +345,7 @@ export class VisualFlowApp {
       this.showError('No hay diagrama para exportar');
       return;
     }
-    
+
     try {
       this.renderer.exportPNG();
       this.showNotification('📥 Diagrama exportado como PNG', 'success');
@@ -359,7 +359,7 @@ export class VisualFlowApp {
    */
   setMode(mode) {
     this.state.currentMode = mode;
-    
+
     // Actualizar botones activos
     this.elements.modeButtons.forEach(btn => {
       btn.classList.remove('active', 'semantic', 'intelligent', 'visual', 'simple');
@@ -367,16 +367,16 @@ export class VisualFlowApp {
         btn.classList.add('active', mode);
       }
     });
-    
+
     // Actualizar placeholder
     this.elements.textInput.placeholder = this.placeholders[mode] || this.placeholders.visual;
-    
+
     // Actualizar texto del botón
     this.updateGenerateButtonText();
-    
+
     // Actualizar título del canvas
     this.updateCanvasTitle();
-    
+
     console.log('🎯 Modo cambiado a:', mode);
   }
 
@@ -385,7 +385,7 @@ export class VisualFlowApp {
    */
   setTheme(theme) {
     this.state.currentTheme = theme;
-    
+
     // Actualizar botones activos
     this.elements.themeButtons.forEach(btn => {
       btn.classList.remove('active');
@@ -393,12 +393,12 @@ export class VisualFlowApp {
         btn.classList.add('active');
       }
     });
-    
+
     // Si hay diagrama, regenerar con nuevo tema
     if (this.state.hasDiagram) {
       this.showNotification(`Tema cambiado a: ${theme}`, 'info');
     }
-    
+
     console.log('🎨 Tema cambiado a:', theme);
   }
 
@@ -412,14 +412,14 @@ export class VisualFlowApp {
       visual: '✨ Crear Visual',
       simple: '📊 Crear Diagrama'
     };
-    
+
     const modeClasses = {
       semantic: 'simple',
       intelligent: 'simple',
       visual: 'visual',
       simple: 'simple'
     };
-    
+
     this.elements.generateBtn.textContent = modeTexts[this.state.currentMode];
     this.elements.generateBtn.className = `generate-button ${modeClasses[this.state.currentMode]}`;
   }
@@ -434,7 +434,7 @@ export class VisualFlowApp {
       visual: 'Tu Visual',
       simple: 'Tu Diagrama'
     };
-    
+
     this.elements.canvasTitle.textContent = titles[this.state.currentMode];
   }
 
@@ -446,14 +446,14 @@ export class VisualFlowApp {
     const diagramData = this.renderer?.diagram || {};
     const nodes = diagramData.diagram?.nodes || [];
     const connections = diagramData.diagram?.connections || [];
-    
+
     this.elements.elementCount.textContent = nodes.length;
     this.elements.connectionCount.textContent = connections.length;
-    
+
     // Mostrar stats en canvas
     this.elements.canvasStats.classList.remove('hidden');
     this.elements.canvasStats.textContent = `${nodes.length} elementos • ${connections.length} conexiones • ${stats.tokensSaved || 0} tokens ahorrados`;
-    
+
     // Actualizar subtítulo
     this.elements.canvasSubtitle.textContent = `${this.state.currentMode} • ${this.state.currentTheme} • ${images.length} imágenes`;
   }
@@ -463,7 +463,7 @@ export class VisualFlowApp {
    */
   updateActionButtons() {
     const show = this.state.hasDiagram;
-    
+
     this.elements.exportBtn.classList.toggle('hidden', !show);
     this.elements.variationsBtn.classList.toggle('hidden', !show);
     this.elements.optimizeBtn.classList.toggle('hidden', !show);
@@ -488,10 +488,10 @@ export class VisualFlowApp {
    */
   onPipelineStateChange(detail) {
     const { state, generationId } = detail;
-    
+
     console.log('📡 Pipeline state change:', state.step, state.progress + '%');
     console.log('📡 Evento recibido en app.js:', JSON.stringify(state));
-    
+
     // Actualizar modal de progreso
     if (this.progressModal) {
       console.log('🎯 Actualizando ProgressModal con estado:', state.step);
@@ -500,7 +500,7 @@ export class VisualFlowApp {
     } else {
       console.error('❌ ProgressModal no disponible para actualizar');
     }
-    
+
     // Actualizar UI según estado (notificaciones adicionales)
     switch (state.step) {
       case 'analyzing':
@@ -538,14 +538,14 @@ export class VisualFlowApp {
       imageCount: result.images.length,
       diagram: this.json.encode(result.diagram)
     };
-    
+
     this.state.generationHistory.unshift(historyItem);
-    
+
     // Mantener solo los últimos 20
     if (this.state.generationHistory.length > 20) {
       this.state.generationHistory = this.state.generationHistory.slice(0, 20);
     }
-    
+
     this.saveHistory();
   }
 
@@ -581,7 +581,7 @@ export class VisualFlowApp {
   showError(message) {
     this.elements.errorText.textContent = message;
     this.elements.errorContainer.classList.remove('hidden');
-    
+
     // Auto-hide después de 5 segundos
     setTimeout(() => this.hideError(), 5000);
   }
@@ -600,7 +600,7 @@ export class VisualFlowApp {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
-    
+
     // Estilos
     notification.style.cssText = `
       position: fixed;
@@ -616,9 +616,9 @@ export class VisualFlowApp {
       max-width: 20rem;
       animation: slideIn 0.3s ease-out;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Auto-remove después de 3 segundos
     setTimeout(() => {
       notification.style.animation = 'slideOut 0.3s ease-in';
@@ -646,7 +646,7 @@ export class VisualFlowApp {
   setLoading(loading) {
     this.state.isLoading = loading;
     this.elements.generateBtn.disabled = loading;
-    
+
     if (loading) {
       this.elements.generateBtn.innerHTML = `
         <div class="loading-spinner"></div>
