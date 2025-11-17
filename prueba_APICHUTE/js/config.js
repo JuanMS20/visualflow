@@ -1,6 +1,6 @@
 /**
  * Configuración de VisualFlow - Frontend Directo
- * 
+ *
  * IMPORTANTE: Este archivo contiene claves API sensibles.
  * - En desarrollo: Usar .env.local con Vite
  * - En producción: Rotar claves frecuentemente
@@ -10,27 +10,27 @@
 // Configuración de APIs de Chutes AI
 export const CONFIG = {
   // Claves API - Reemplazar con valores reales
-  KIMI_API_KEY: 'cpk_7d264dc3847b467ea59f4da1d1d050a3.980bfcccb81f51a3ab901cf5c53fc6e0.S6Mp1WEGMU6rThOvkgw4Lih43ndh5M2O',
-  QWEN_IMAGE_API_KEY: 'cpk_7d264dc3847b467ea59f4da1d1d050a3.980bfcccb81f51a3ab901cf5c53fc6e0.S6Mp1WEGMU6rThOvkgw4Lih43ndh5M2O',
-  QWEN_VL_API_KEY: 'cpk_7d264dc3847b467ea59f4da1d1d050a3.980bfcccb81f51a3ab901cf5c53fc6e0.S6Mp1WEGMU6rThOvkgw4Lih43ndh5M2O',
-  
+  KIMI_API_KEY: '',
+  QWEN_IMAGE_API_KEY: '',
+  QWEN_VL_API_KEY: '',
+
   // Endpoints
-  ENDPOINT_LLM: 'https://llm.chutes.ai/v1/chat/completions',
-  ENDPOINT_IMAGE: 'https://image.chutes.ai/generate',
-  
+  ENDPOINT_LLM: 'http://localhost:3000/api/chat',
+  ENDPOINT_IMAGE: 'http://localhost:3000/api/image',
+
   // Modelos
   MODELS: {
     KIMI: 'moonshotai/Kimi-K2-Thinking',
     QWEN_IMAGE: 'qwen-image',
     QWEN_VL: 'Qwen/Qwen3-VL-235B-A22B-Instruct'
   },
-  
+
   // Límites y configuración
   RATE_LIMIT: {
     MIN_INTERVAL: 5000, // 5 segundos entre llamadas
     DAILY_LIMIT: 50     // 50 diagramas por día
   },
-  
+
   // Configuración de generación de imágenes
   IMAGE_CONFIG: {
     width: 1024,
@@ -39,7 +39,7 @@ export const CONFIG = {
     guidanceScale: 7.5,
     negativePrompt: 'texto, letras, números, palabras, blur, low quality, distortion, watermark'
   },
-  
+
   // Configuración de TOON
   TOON_CONFIG: {
     delimiter: ',',
@@ -52,11 +52,11 @@ export const CONFIG = {
 export const DEBUG = {
   enabled: true,
   maxLogs: 1000,
-  
+
   log: function(message) {
     const timestamp = new Date().toLocaleTimeString();
     const logEntry = `[${timestamp}] ${message}`;
-    
+
     // Guardar en localStorage
     try {
       let logs = JSON.parse(localStorage.getItem('visualflow_logs') || '[]');
@@ -66,18 +66,18 @@ export const DEBUG = {
     } catch (e) {
       console.warn('No se pudo guardar log en localStorage:', e);
     }
-    
+
     // Mostrar en consola
     console.log(`📝 ${logEntry}`);
-    
+
     // Actualizar panel si existe
     this.updatePanel();
   },
-  
+
   error: function(message) {
     this.log(`❌ ERROR: ${message}`);
   },
-  
+
   getLogs: function() {
     try {
       return JSON.parse(localStorage.getItem('visualflow_logs') || '[]');
@@ -85,12 +85,12 @@ export const DEBUG = {
       return [];
     }
   },
-  
+
   clearLogs: function() {
     localStorage.removeItem('visualflow_logs');
     this.updatePanel();
   },
-  
+
   updatePanel: function() {
     const panel = document.getElementById('debug-panel');
     if (panel) {
@@ -102,7 +102,7 @@ export const DEBUG = {
       }
     }
   },
-  
+
   exportLogs: function() {
     const logs = this.getLogs().join('\n');
     const blob = new Blob([logs], { type: 'text/plain' });
@@ -131,7 +131,6 @@ console.warn(
 // 🚨 INICIAR LOGGING
 DEBUG.log('=== VISUALFLOW INICIADO ===');
 DEBUG.log('Fecha: ' + new Date().toISOString());
-DEBUG.log('Archivo de debug: ' + DEBUG.file);
 
 // Exportar para uso global
 window.VISUALFLOW_CONFIG = CONFIG;
